@@ -68,6 +68,34 @@ func handlerReset(s *state, cmd command) error {
 	return nil
 }
 
+func handlerGetUsers(s *state, cmd command) error {
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("couldn't retrieve users: %w", err)
+	}
+
+	for _, user := range users {
+		if user.Name == s.cfg.CurrentUserName {
+			fmt.Printf("* %s (current)\n", user.Name)
+			continue
+		}
+		fmt.Printf("* %s\n", user.Name)
+	}
+
+	return nil
+}
+
+func handlerAggregate(s* state, cmd command) error {
+	feed, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return fmt.Errorf("failed to fetch RSS feed: %w", err)
+	}
+
+	fmt.Printf("Feed: %v\n", feed)
+
+	return nil
+}
+
 func printUser(user database.User) {
 	fmt.Printf(" * ID:      %v\n", user.ID)
 	fmt.Printf(" * Name:    %v\n", user.Name)
