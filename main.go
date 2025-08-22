@@ -1,9 +1,11 @@
 package main
-import _ "github.com/lib/pq"
 import (
 	"log"
 	"os"
+	"database/sql"
+	"github.com/marveeeen/gator/internal/database"
 	"github.com/marveeeen/gator/internal/config"
+	_ "github.com/lib/pq"
 )
 
 type state struct {
@@ -17,14 +19,20 @@ func main() {
 		log.Fatal("Error reading config:", err)
 	}
 
-	db, err := sql.Open("postgres", cfg.DatabaseURL)
+	db, err := sql.Open("postgres", cfg.DbURL)
+	if err != nil {
+		log.Fatal("Error connecting to database:", err)
+	}
+	defer db.Close()
+	dbQueries := database.New(db)
 
-	programState := &state{cfg: &cfg}
+	programState := &state{cfg: &cfg, db: dbQueries}
 	cmds := commands{
 		registeredCommands: make(map[string]func(*state, command) error),
 	}
 
 	cmds.register("login", handlerLogin)
+	cmds.register("register", handlerRegister)
 
 	if len(os.Args) < 2 {
 		log.Fatal("Usage: cli <command> [args...]")
