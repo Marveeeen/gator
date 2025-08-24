@@ -1,6 +1,6 @@
 # Gator CLI
 
-Gator is a command-line tool for managing RSS feeds and users, backed by a PostgreSQL database.  
+A multi-player command line tool for aggregating RSS feeds and viewing the posts.
 This project is part of the Boot.dev program.
 
 ## Prerequisites
@@ -10,30 +10,23 @@ This project is part of the Boot.dev program.
 
 ## Installation
 
-Clone the repository and install the CLI using `go install`:
+Make sure you have the latest [Go toolchain](https://golang.org/dl/) installed as well as a local Postgres database. You can then install `gator` with:
 
-```sh
-git clone https://github.com/marveeeen/gator.git
-cd gator
-go install
+```bash
+go install ...
 ```
-
-This will build and install the `gator` CLI to your `$GOPATH/bin`.
 
 ## Configuration
 
-Before running the CLI, you need to set up your configuration file. The config file is stored as `.gatorconfig.json` in your home directory.
-
-You can create it manually or let the CLI generate it. The file should look like:
+Create a `.gatorconfig.json` file in your home directory with the following structure:
 
 ```json
-{
-  "db_url": "postgres://username:password@localhost:5432/gatordb?sslmode=disable",
-  "current_user_name": ""
+{b
+  "db_url": "postgres://username:@localhost:5432/database?sslmode=disable"
 }
 ```
 
-Replace `username`, `password`, and `gatordb` with your PostgreSQL credentials and database name.
+Replace the values with your database connection string.
 
 ## Database Setup
 
@@ -50,22 +43,34 @@ See [sqlc.yaml](sqlc.yaml) for configuration and generated code in [internal/dat
 
 ## Usage
 
-Run the CLI with:
+Create a new user:
 
-```sh
-gator <command> [args...]
+```bash
+gator register <name>
 ```
 
-Some available commands:
+Add a feed:
 
-- `register <username>`: Register a new user.
-- `login <username>`: Log in as an existing user.
-- `addfeed <feed_url>`: Add a new RSS feed (requires login).
-- `feeds`: List all available feeds.
-- `follow <feed_id>`: Follow a feed (requires login).
-- `unfollow <feed_id>`: Unfollow a feed (requires login).
-- `browse`: Browse posts from followed feeds (requires login).
+```bash
+gator addfeed <url>
+```
 
-For more commands, see [commands.go](commands.go).
+Start the aggregator:
 
-For more details, see the source files such as [main.go](main.go), [internal/config/main.go](internal/config/main.go),
+```bash
+gator agg 30s
+```
+
+View the posts:
+
+```bash
+gator browse [limit]
+```
+
+There are a few other commands you'll need as well:
+
+- `gator login <name>` - Log in as a user that already exists
+- `gator users` - List all users
+- `gator feeds` - List all feeds
+- `gator follow <url>` - Follow a feed that already exists in the database
+- `gator unfollow <url>` - Unfollow a feed that already exists in the database
